@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>bash</title>
+<style>
+  * { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+  }
+
+  body {
+    background: #000000;
+    color: #e0e0e0;
+    font-family: Consolas, Monaco, "Courier New", monospace;
+    font-size: 14px;
+    line-height: 1.4;
+    height: 100vh;
+    padding: 15px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #log {
+    flex: 1;
+    overflow-y: auto;
+    word-wrap: break-word;
+  }
+
+  #log div {
+    margin-bottom: 2px;
+    white-space: pre-wrap;
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 15px;
+    background-color: #ffffff;
+    animation: blink 1s step-end infinite;
+    vertical-align: bottom;
+    margin-left: 5px;
+  }
+
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* Финальный экран (шутка) */
+  #final {
+    display: none;
+    position: fixed; 
+    inset: 0;
+    background: #ffffff;
+    color: #000000;
+    text-align: center;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    font-family: Consolas, Monaco, "Courier New", monospace;
+    z-index: 999;
+  }
+  #final .emoji { font-size: 70px; line-height: 1; }
+  #final h1 { font-size: 34px; margin-top: 18px; letter-spacing: 2px; }
+  #final p  { font-size: 16px; margin-top: 20px; line-height: 1.6; max-width: 420px; }
+</style>
+</head>
+<body>
+
+  <div id="log">
+    <div>root@android:/storage/emulated/0 # ./copy_data.sh --encrypt</div>
+  </div>
+<script>
+  const log     = document.getElementById('log');
+  const finalEl = document.getElementById('final');
+  
+  // Мигающий курсор
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor';
+  log.appendChild(cursor);
+
+  let percent = 0;
+  let hasStalled = false;
+
+  function pad(x, len) { return String(x).padStart(len, '0'); }
+
+  // Функция вывода текста
+  function print(text) {
+    const line = document.createElement('div');
+    line.textContent = text;
+    log.insertBefore(line, cursor);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  // Главный цикл
+  function processData() {
+    // --- ЗАВИСАНИЕ НА 73% ---
+    if (percent === 73 && !hasStalled) {
+      hasStalled = true;
+      print(`[!] Network lag detected. Reconnecting...`);
+      
+      // Стоим 3 секунды и продолжаем
+      setTimeout(processData, 3000); 
+      return;
+    }
+
+    // Выводим строчку с процентами
+    print(`[${pad(percent, 3)}%] The data has been copied.`);
+    
+    percent++;
+    
+    if (percent > 100) {
+      // Конец
+      print("root@android:/storage/emulated/0 # Process finished. Upload complete.");
+      setTimeout(() => { 
+        finalEl.style.display = 'flex'; 
+      }, 1500);
+      return;
+    }
+    
+    // Случайная скорость для эффекта "живой" загрузки (от 10 до 50 мс)
+    const speed = Math.floor(Math.random() * 40) + 10;
+    setTimeout(processData, speed);
+  }
+
+  // Запуск через полсекунды после открытия страницы
+  setTimeout(processData, 500);
+
+</script>
+</body>
+</html>
